@@ -1,0 +1,59 @@
+---
+title: "Assignment 02 - Spark Analysis"
+format: html
+execute:
+  python: python3
+---
+
+# Top 5 Most Posted Job Titles
+
+```{python}
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder \
+    .config("spark.driver.host", "localhost") \
+    .appName("JobPostingsAnalysis") \
+    .getOrCreate()
+
+df = spark.read.option("header", "true") \
+    .option("inferSchema", "true") \
+    .option("multiLine", "true") \
+    .option("escape", "\"") \
+    .csv("./data/lightcast_job_postings.csv")
+
+df.createOrReplaceTempView("job_postings")
+
+top_titles = spark.sql("""
+    SELECT TITLE_RAW, COUNT(*) AS job_count
+    FROM job_postings
+    GROUP BY TITLE_RAW
+    ORDER BY job_count DESC
+    LIMIT 5
+""")
+
+top_titles.toPandas()
+
+
+
+
+
+---
+
+
+
+```markdown
+```{python}
+import matplotlib.pyplot as plt
+
+top_titles_pd = top_titles.toPandas()
+
+top_titles_pd.plot(kind="bar", x="TITLE_RAW", y="job_count", legend=False)
+plt.title("Top 5 Most Posted Job Titles")
+plt.xlabel("Job Title")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.savefig("top_5_job_titles.png")
+
+
+
+
