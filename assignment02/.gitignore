@@ -1,0 +1,5 @@
+data/
+output/
+analysis_files/
+.venv/
+lightcast_job_postings.csv
